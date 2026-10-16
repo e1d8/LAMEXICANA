@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<title>Pruebas de carga de la carta</title>
+<h1>Pruebas de carga de la carta</h1>
+<p id="status">Ejecutando…</p>
+<ol id="results"></ol>
+<script>
+(async () => {
+  const results = document.querySelector("#results");
+  const status = document.querySelector("#status");
+  const base = new URL("../", location.href).href;
+  const original = await (await fetch(new URL("menu.json", base))).json();
+  const page = await (await fetch(new URL("index.html", base))).text();
+  const copy = () => JSON.parse(JSON.stringify(original));
+  let failures = 0;
+
+  function assert(condition, message) {
+    if (!condition) throw new Error(message);
+  }
+
+  async function test(name, fixture, check, { httpStatus = 200, raw = false, networkError = false } = {}) {
+    const frame = document.createElement("iframe");
+    frame.hidden = true;
+    const body = raw ? fixture : JSON.stringify(fixture);
+    const stub = `
+      window.requests = [];
+      window.fetch = async (url, options) => {
+        window.requests.push({ url, options });
+        if (${networkError}) throw new TypeError("Network error");
+        return new Response(${JSON.stringify(body)}, { status: ${httpStatus} });
+      };
+    `.replace(/</g, "\\u003c");
+    frame.srcdoc = page.replace("<head>", `<head><base href="${base}">`)
+      .replace('<script src="script.js" defer></' + 'script>',
+        '<script>' + stub + '</' + 'script><script src="script.js" defer></' + 'script>');
+    document.body.append(frame);
+    try {
+      await new Promise((resolve, reject) => {
+        const deadline = Date.now() + 10000;
+        function wait() {
+          if (frame.contentDocument.querySelector('#menu-sections[aria-busy="false"]')) resolve();
+          else if (Date.now() > deadline) reject(new Error("La carga no terminó"));
+          else setTimeout(wait, 20);
+        }
+        wait();
+      });
+      const doc = frame.contentDocument;
+      assert(frame.contentWindow.requests.length === 1, "Debe cargar el JSON una vez por apertura");
+      assert(frame.contentWindow.requests[0].url === "menu.json", "Debe cargar menu.json");
+      assert(frame.contentWindow.requests[0].options.cache === "no-store", "Debe solicitar datos sin caché");
+      await check(doc, frame.contentWindow);
+      const result = document.createElement("li");
+      result.textContent = `OK: ${name}`;
+      results.append(result);
+    } catch (error) {
+      failures++;
+      const result = document.createElement("li");
+      result.textContent = `ERROR: ${name}: ${error.message}`;
+      results.append(result);
+    } finally {
+      frame.remove();
+    }
+  }
+
+  const names = (doc) => [...doc.querySelectorAll(".item-name")].map((el) => el.textContent);
+  const schema = (doc) => JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
+  const checkUnavailable = (doc) => {
+    assert(doc.querySelectorAll(".menu-item, .navigation-link").length === 0, "No debe mostrar entradas");
+    assert(doc.querySelector(".menu-message"), "Debe explicar por qué no hay carta");
+    assert(doc.querySelector("#menu-button").disabled, "El índice debe estar desactivado");
+    assert(!doc.querySelector('script[type="application/ld+json"]'), "No debe publicar datos inválidos");
+  };
+
+  await test("Se conservan todos los productos, precios, descripciones y alérgenos", original, (doc, win) => {
+    assert(doc.querySelectorAll(".menu-section").length === 8, "Deben aparecer las 8 secciones");
+    assert(doc.querySelectorAll(".menu-item").length === 78, "Deben aparecer los 78 productos");
+    original.sections.forEach((section) => {
+      const rendered = doc.getElementById(section.id);
+      assert(rendered.querySelector("h2").textContent === section.name, "Nombre de sección distinto");
+      [...rendered.querySelectorAll(".menu-item")].forEach((item, index) => {
+        const expected = section.items[index];
+        assert(item.querySelector(".item-name").textContent === expected.name, "Nombre de producto distinto");
+        assert((item.querySelector(".item-price")?.textContent) === expected.price, "Precio distinto");
+        assert((item.querySelector(".item-description")?.textContent) === expected.description, "Descripción distinta");
+        const labels = [...item.querySelectorAll(".allergen")].map((el) => el.dataset.label);
+        assert(JSON.stringify(labels) === JSON.stringify((expected.allergens || []).map((key) => original.allergens[key].label)), "Alérgenos distintos");
+      });
+    });
+    assert(schema(doc).hasMenu.hasMenuSection.length === 8, "Los buscadores deben usar la carta cargada");
+    doc.querySelector("#menu-button").click();
+    assert(!doc.querySelector("#menu-overlay").hidden, "El índice debe abrirse");
+    doc.dispatchEvent(new win.KeyboardEvent("keydown", { key: "Escape" }));
+    assert(doc.querySelector("#menu-overlay").hidden, "Escape debe cerrar el índice");
+  });
+
+  const expanded = copy();
+  expanded.allergens.nuevo = { label: "Nuevo alérgeno", icon: "assets/allergens/gluten.svg" };
+  expanded.sections[0].items.push({ name: "Bebida nueva", price: "4€" });
+  expanded.sections.push({ id: "nueva", name: "Nueva sección", items: [
+    { name: '<img src=x onerror="alert(1)">', description: "Texto nuevo", price: "5,50 €", allergens: ["nuevo"] }
+  ] });
+  await test("Nuevas entradas, secciones y alérgenos aparecen sin cambiar el código", expanded, (doc) => {
+    assert(names(doc).length === 80, "Deben aparecer los nuevos productos");
+    assert(names(doc).includes("Bebida nueva"), "Falta el nuevo producto");
+    assert(doc.querySelectorAll(".navigation-link").length === 9, "El índice debe incluir la sección nueva");
+    assert(doc.querySelector("#nueva .allergen").dataset.label === "Nuevo alérgeno", "Falta el nuevo alérgeno");
+    assert(!doc.querySelector("#nueva h3 img"), "Los datos deben mostrarse como texto");
+    assert(schema(doc).hasMenu.hasMenuSection.at(-1).hasMenuItem[0].offers.price === "5.50", "Precio estructurado incorrecto");
+  });
+
+  const mixed = copy();
+  const badItems = [null, [], 3, {}, { name: " " }, { name: 2 },
+    { name: "Mal", price: -3 }, { name: "Mal", price: "-3€" },
+    { name: "Mal", price: "gratis" }, { name: "Mal", price: "3.999€" },
+    { name: "Mal", price: null }, { name: "Mal", description: {} },
+    { name: "Mal", allergens: "gluten" }, { name: "Mal", allergens: ["desconocido"] },
+    { name: "Mal", allergens: ["toString"] }, { name: "Mal", allergens: [null] }];
+  mixed.sections[0].items.push(...badItems);
+  const validItem = { name: "Duplicado", price: "1€" };
+  mixed.sections.push(null, [], {}, { id: "incorrecta", name: "Mal", items: {} },
+    { id: "sin-nombre", name: " ", items: [validItem] },
+    { id: "ID inválido", name: "Mal", items: [validItem] },
+    { id: "bebidas", name: "Mal", items: [validItem] },
+    { id: "bebidas-title", name: "Mal", items: [validItem] },
+    { id: "menu-button", name: "Mal", items: [validItem] },
+    { id: "vacia", name: "Vacía", items: [] },
+    { id: "invalida", name: "Inválida", items: badItems });
+  await test("Las entradas mal formadas se omiten y el resto sigue visible", mixed, (doc) => {
+    assert(names(doc).length === 78, "Solo deben aparecer los productos originales");
+    assert(doc.querySelectorAll(".navigation-link").length === 8, "El índice solo debe incluir secciones válidas");
+    assert(schema(doc).hasMenu.hasMenuSection.flatMap((section) => section.hasMenuItem).length === 78, "El esquema debe omitir las entradas inválidas");
+    const ids = [...doc.querySelectorAll("[id]")].map((el) => el.id);
+    assert(new Set(ids).size === ids.length, "No debe haber identificadores duplicados");
+  });
+
+  const badAllergens = copy();
+  badAllergens.allergens.lacteo = { label: "Lácteo", icon: "javascript:alert(1)" };
+  badAllergens.allergens.gluten = null;
+  await test("Las definiciones de alérgenos incorrectas descartan los productos afectados", badAllergens, (doc) => {
+    const expected = original.sections.flatMap((section) => section.items)
+      .filter((item) => !item.allergens?.some((key) => key === "lacteo" || key === "gluten"));
+    assert(JSON.stringify(names(doc)) === JSON.stringify(expected.map((item) => item.name)), "Debe omitir los productos con alérgenos inválidos");
+  });
+
+  await test("Carta vacía", { sections: [] }, checkUnavailable);
+  await test("Estructura raíz incorrecta", { sections: {} }, checkUnavailable);
+  await test("JSON raíz nulo", null, checkUnavailable);
+  await test("JSON con sintaxis incorrecta", '{"sections": [}', checkUnavailable, { raw: true });
+  await test("Error HTTP", original, checkUnavailable, { httpStatus: 404 });
+  await test("Error de red", original, checkUnavailable, { networkError: true });
+
+  status.textContent = failures ? `${failures} pruebas fallidas` : "Todas las pruebas han pasado";
+  document.documentElement.dataset.result = failures ? "failed" : "passed";
+})().catch((error) => {
+  document.querySelector("#status").textContent = error.stack;
+  document.documentElement.dataset.result = "failed";
+});
+</script>
+</html>

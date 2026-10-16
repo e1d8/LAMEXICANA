@@ -1,151 +1,71 @@
 "use strict";
 
-const allergens = {
-  lacteo: { label: "Lácteos", icon: "assets/allergens/lacteo.svg" },
-  huevos: { label: "Huevos", icon: "assets/allergens/huevos.svg" },
-  gluten: { label: "Gluten", icon: "assets/allergens/gluten.svg" },
-  cacahuetes: { label: "Cacahuetes", icon: "assets/allergens/cacahuetes.svg" },
-  sesamo: { label: "Sésamo", icon: "assets/allergens/sesamo.svg" },
-  altramuces: { label: "Altramuces", icon: "assets/allergens/altramuces.svg" },
-  frutosConCascara: { label: "Frutos con cáscara", icon: "assets/allergens/frutos-con-cascara.svg" }
-};
-
-const menuSections = [
-  {
-    id: "bebidas",
-    name: "Bebidas",
-    items: [
-      { name: "Jarritos", price: "3.20€" },
-      { name: "Modelo rubia", price: "3.20€" },
-      { name: "Agua pequeña", price: "1.80€" },
-      { name: "Agua grande", price: "2.80€" },
-      { name: "Agua con gas", price: "2.40€" },
-      { name: "Coca cola/Coca cola zero", price: "2.20€" },
-      { name: "Fanta naranja/limón", price: "2.20€" },
-      { name: "Mahou", price: "2.50€" },
-      { name: "Mahou 0'0", price: "2.60€" },
-      { name: "Radler", price: "2.60€" },
-      { name: "Alhambra", price: "3.20€" },
-      { name: "Salitos", price: "3.00€" },
-      { name: "Copa de vino", description: "Consultar vinos", price: "2.80€" },
-      { name: "Botella de vino", description: "Consultar vinos/precios" },
-      { name: "Aquarius", price: "2.20€" },
-      { name: "Modelo negra", price: "3.60€" },
-      { name: "Pacífico", price: "3.20€" },
-      { name: "Corona", price: "3.20€" },
-      { name: "Agua de tamarindo", price: "3.20€" },
-      { name: "Agua de jamaica", price: "3.20€" },
-      { name: "Horchata mexicana", description: "Bebida a base de arroz", price: "3.20€" }
-    ]
-  },
-  {
-    id: "entrantes",
-    name: "Entrantes",
-    items: [
-      { name: "Guacamole", description: "Guacamole casero, acompañado de pico de gallo y totopos", price: "9.50€", allergens: ["lacteo"] },
-      { name: "Frijoles charros", description: "Frijoles con chorizo, panceta, cebolla y cilantro.", price: "6.50€" },
-      { name: "Nachos grandes", description: "Totopos con queso gratinado, frijoles, nata, pico de gallo, guacamole y jalapeños.(Suplemento salsas +1€)", price: "12.00€", allergens: ["lacteo"] },
-      { name: "Nachos pequeños", description: "Totopos con queso gratinado, frijoles, nata, pico de gallo, guacamole y jalapeños. (Suplemento de salsas +1€)", price: "10.00€", allergens: ["lacteo"] },
-      { name: "Papas \"La Mexicana\"", description: "Patatas fritas aderezadas con salsa casera de mayonesa y chipotle.", price: "6.50€", allergens: ["huevos", "gluten"] },
-      { name: "Chilaquiles", description: "Totopos bañados en salsa verde (picante), con pollo, queso gratinado, nata, cebolla y cilantro.", price: "12.50€", allergens: ["lacteo"] },
-      { name: "Arrachera", description: "Corte de vacuno (Entraña) acompañado de patatas fritas, frijoles y tortillas.", price: "22.00€", allergens: ["lacteo", "gluten"] },
-      { name: "Jalapeños", description: "Jalapeños rebozado relleno de queso crema.", price: "7.00€" },
-      { name: "Tequeños", price: "7.00€", allergens: ["huevos", "lacteo", "gluten"] }
-    ]
-  },
-  {
-    id: "para-compartir",
-    name: "Para compartir",
-    items: [
-      { name: "Gringa (Pibil, Tinga, Choripapa o Pastor)", description: "2 tortillas de harina, rellenas de carne al pastor, queso, cebolla, piña y cilantro.", price: "12.50€", allergens: ["lacteo", "gluten"] },
-      { name: "Gringa especial ( Lengua, Carnitas, Bistec o Mole)", description: "2 tortillas de harina rellenas de ternera y queso, acompañada de guacamole.", price: "14.50€", allergens: ["lacteo", "gluten"] },
-      { name: "Sincronizada", description: "2 tortillas de harina rellenas de queso y jamón York, bañadas en salsa verde (picante) y nata.", price: "7.50€", allergens: ["gluten", "lacteo"] }
-    ]
-  },
-  {
-    id: "tacos-quesadillas",
-    name: "Tacos/Quesadillas",
-    items: [
-      { name: "Cochinita pibil", description: "Carne de cerdo mechada adobada en achiote y cebolla morada encurtida.", price: "3.00€" },
-      { name: "Pastor", description: "Carne de cerdo marinada, cebolla, piña y cilantro.", price: "3.00€" },
-      { name: "Tinga", description: "Carne mechada de pollo, guisada en chipotle y cebolla.", price: "3.00€" },
-      { name: "Choripapa", description: "Chorizo, patata y cebolla.", price: "2.80€" },
-      { name: "Mole poblano", description: "Carne mechada de pollo, guisada con mole poblano. (Picante leve)", price: "4.00€", allergens: ["cacahuetes", "sesamo", "altramuces"] },
-      { name: "Bistec", description: "Ternera con guacamole.", price: "4.00€" },
-      { name: "Lengua", description: "Lengua de vaca guisada, cebolla y cilantro.", price: "4.00€" },
-      { name: "Carnitas", description: "Carne de cerdo mechada marinada en salsa verde, cebolla y cilantro.", price: "4.00€" },
-      { name: "Quesadilla (Pibil, tinga, pastor o chori)", price: "4.00€", allergens: ["lacteo", "gluten"] },
-      { name: "Quesadilla (Bistec, Mole, Carnitas o Lengua)", price: "4.80€", allergens: ["lacteo", "gluten"] },
-      { name: "Flautas de papa", description: "Tortilla crujiente rellena de patata con nata, guacamole y queso feta.", price: "7.00€", allergens: ["lacteo"] },
-      { name: "Flautas de pollo", description: "Tortilla crujiente rellena de pollo guisado, nata, guacamole y queso feta.", price: "7.80€", allergens: ["lacteo"] },
-      { name: "Quesadilla chicharrón", description: "(Torrezno)", price: "4.40€" },
-      { name: "Quesabirria", description: "Quesadilla en tortilla de maíz, con birria y su propio consomé", price: "4.80€" }
-    ]
-  },
-  {
-    id: "menu-ninos",
-    name: "Menú niños",
-    items: [
-      { name: "Nuggets", description: "Nuggets con patatas fritas y bebida (agua, zumo o coca cola/fanta).", price: "7.50€" },
-      { name: "Quesadillas", description: "Quesadillas de jamón York y queso, patatas fritas y bebida (agua, zumo o coca cola/fanta).", price: "7.50€" }
-    ]
-  },
-  {
-    id: "postres",
-    name: "Postres",
-    items: [
-      { name: "Mostachón", description: "Bizcocho de nuez con crema de queso y fruta de temporada.", price: "6.00€", allergens: ["cacahuetes", "gluten", "frutosConCascara", "lacteo", "huevos"] },
-      { name: "Brownie", price: "5.50€", allergens: ["gluten", "frutosConCascara", "lacteo", "huevos", "cacahuetes"] },
-      { name: "Pastel de elote", description: "Bizcocho de elote (maíz dulce) con dulce de leche y nata.", price: "6.00€", allergens: ["gluten", "lacteo", "huevos"] },
-      { name: "Coulant", price: "5.00€", allergens: ["gluten", "frutosConCascara", "lacteo", "huevos", "cacahuetes"] },
-      { name: "Fresas con nata", price: "5.50€", allergens: ["lacteo"] },
-      { name: "Fruta", description: "Piña/melocotón en almíbar con nata.", price: "3.50€", allergens: ["lacteo"] },
-      { name: "3 leches", description: "Bizcocho casero bañado en 3 tipos de leche", price: "6.00€" }
-    ]
-  },
-  {
-    id: "cafes-infusiones",
-    name: "Cafés / Infusiones",
-    items: [
-      { name: "Café solo", price: "1.20€" },
-      { name: "Café americano", price: "1.60€" },
-      { name: "Cortado", price: "1.50€" },
-      { name: "Café bombón", price: "1.70€" },
-      { name: "Café con leche", price: "1.70€" },
-      { name: "Carajillo", price: "2.70€" },
-      { name: "Infusiones", price: "1.40€" },
-      { name: "Suplemento hielo", price: "0.20€" },
-      { name: "Suplemento tocado", price: "0.50€" }
-    ]
-  },
-  {
-    id: "cocteles-licores",
-    name: "Cócteles / Licores",
-    items: [
-      { name: "Michelada cerveza nacional", description: "Cerveza combinada con salsa inglesa, salsa Maggi y Clamato.", price: "5.50€" },
-      { name: "Margarita", description: "Granizado de limón, triple seco y tequila.", price: "7.00€" },
-      { name: "Tequila sunrise", description: "Zumo de naranja, granadina y tequila.", price: "7.00€" },
-      { name: "Mojito", price: "7.00€" },
-      { name: "Piña colada", description: "Ron, piña, coco y canela.", price: "7.00€" },
-      { name: "Bloody Mary", description: "Zumo de tomate, vodka, salsa inglesa, sal y pimienta.", price: "7.00€" },
-      { name: "Combinados de ron/whisky/ginebra", price: "7.00€" },
-      { name: "Copas de licor", price: "3.50€" },
-      { name: "Chupitos", price: "2.00€" },
-      { name: "Tequilas premium", description: "Consultar tequilas", price: "6.00€" },
-      { name: "Caballito de tequila", price: "3.50€" },
-      { name: "Michelada cerveza mexicana", description: "Con cerveza mexicana", price: "6.00€" },
-      { name: "Chelada", price: "4.50€" }
-    ]
-  }
-];
-
 const sectionsContainer = document.querySelector("#menu-sections");
 const navigationList = document.querySelector("#navigation-list");
 const menuButton = document.querySelector("#menu-button");
 const menuOverlay = document.querySelector("#menu-overlay");
 let elementToRestoreFocus = null;
 
-function createAllergen(key) {
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isNonEmptyString(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function validateMenu(data) {
+  if (!isRecord(data) || !Array.isArray(data.sections)) {
+    throw new Error("La carta debe contener un array de secciones.");
+  }
+
+  const allergens = Object.create(null);
+  if (isRecord(data.allergens)) {
+    Object.entries(data.allergens).forEach(([key, definition]) => {
+      if (!isRecord(definition) || !isNonEmptyString(definition.label)
+        || typeof definition.icon !== "string"
+        || !/^assets\/allergens\/[a-zA-Z0-9_-]+\.(svg|png|webp)$/.test(definition.icon)) return;
+
+      allergens[key] = { label: definition.label.trim(), icon: definition.icon };
+    });
+  }
+
+  // Reserve both section and heading IDs to keep navigation unambiguous.
+  const usedIds = new Set([...document.querySelectorAll("[id]")].map((element) => element.id));
+  const sections = [];
+
+  data.sections.forEach((section) => {
+    if (!isRecord(section) || typeof section.id !== "string"
+      || !/^[a-z][a-z0-9-]*$/.test(section.id)
+      || usedIds.has(section.id) || usedIds.has(`${section.id}-title`)
+      || !isNonEmptyString(section.name) || !Array.isArray(section.items)) return;
+
+    const items = [];
+    section.items.forEach((item) => {
+      if (!isRecord(item) || !isNonEmptyString(item.name)
+        || (item.description !== undefined && typeof item.description !== "string")
+        || (item.price !== undefined && (typeof item.price !== "string"
+          || !/^\d+(?:[.,]\d{1,2})?\s*€$/.test(item.price.trim())))
+        || (item.allergens !== undefined && (!Array.isArray(item.allergens)
+          || !item.allergens.every((key) => typeof key === "string" && Object.hasOwn(allergens, key))))) return;
+
+      const validItem = { name: item.name.trim() };
+      if (item.description !== undefined) validItem.description = item.description.trim();
+      if (item.price !== undefined) validItem.price = item.price.trim();
+      if (item.allergens !== undefined) validItem.allergens = [...new Set(item.allergens)];
+      items.push(validItem);
+    });
+
+    if (!items.length) return;
+    usedIds.add(section.id);
+    usedIds.add(`${section.id}-title`);
+    sections.push({ id: section.id, name: section.name.trim(), items });
+  });
+
+  return { allergens, sections };
+}
+
+function createAllergen(key, allergens) {
   const definition = allergens[key];
   if (!definition) return null;
 
@@ -165,7 +85,7 @@ function createAllergen(key) {
   return wrapper;
 }
 
-function createMenuItem(item) {
+function createMenuItem(item, allergens) {
   const listItem = document.createElement("li");
   listItem.className = "menu-item";
 
@@ -205,7 +125,7 @@ function createMenuItem(item) {
     allergenList.className = "allergens-container";
     allergenList.setAttribute("aria-label", "Alérgenos");
     item.allergens.forEach((key) => {
-      const allergen = createAllergen(key);
+      const allergen = createAllergen(key, allergens);
       if (allergen) allergenList.append(allergen);
     });
     article.append(allergenList);
@@ -219,7 +139,7 @@ function createMenuItem(item) {
   return listItem;
 }
 
-function renderMenu() {
+function renderMenu(menuSections, allergens) {
   const sectionsFragment = document.createDocumentFragment();
   const navigationFragment = document.createDocumentFragment();
 
@@ -238,7 +158,7 @@ function renderMenu() {
     const list = document.createElement("ul");
     list.className = "item-list";
     list.setAttribute("aria-labelledby", heading.id);
-    section.items.forEach((item) => list.append(createMenuItem(item)));
+    section.items.forEach((item) => list.append(createMenuItem(item, allergens)));
     sectionElement.append(header, list);
     sectionsFragment.append(sectionElement);
 
@@ -257,6 +177,7 @@ function renderMenu() {
 }
 
 function openNavigation() {
+  if (menuButton.disabled) return;
   elementToRestoreFocus = document.activeElement;
   menuOverlay.hidden = false;
   document.body.classList.add("menu-open");
@@ -304,7 +225,7 @@ function trapDialogFocus(event) {
   }
 }
 
-function addStructuredData() {
+function addStructuredData(menuSections) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Restaurant",
@@ -331,7 +252,7 @@ function addStructuredData() {
           if (item.price) {
             menuItem.offers = {
               "@type": "Offer",
-              price: item.price.replace("€", ""),
+              price: item.price.replace("€", "").trim().replace(",", "."),
               priceCurrency: "EUR"
             };
           }
@@ -360,5 +281,37 @@ document.addEventListener("keydown", (event) => {
   trapDialogFocus(event);
 });
 
-renderMenu();
-addStructuredData();
+function showMenuMessage(message) {
+  const paragraph = document.createElement("p");
+  paragraph.className = "menu-message";
+  paragraph.textContent = message;
+  sectionsContainer.replaceChildren(paragraph);
+}
+
+async function loadMenu() {
+  menuButton.disabled = true;
+  sectionsContainer.setAttribute("aria-busy", "true");
+  showMenuMessage("Cargando la carta…");
+
+  try {
+    const response = await fetch("menu.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`No se pudo cargar la carta (${response.status}).`);
+
+    const menu = validateMenu(await response.json());
+    if (!menu.sections.length) {
+      showMenuMessage("La carta no está disponible en este momento.");
+      return;
+    }
+
+    renderMenu(menu.sections, menu.allergens);
+    addStructuredData(menu.sections);
+    menuButton.disabled = false;
+  } catch (error) {
+    showMenuMessage("No se ha podido cargar la carta. Recarga la página para volver a intentarlo.");
+    console.error("Error al cargar la carta:", error);
+  } finally {
+    sectionsContainer.setAttribute("aria-busy", "false");
+  }
+}
+
+loadMenu();

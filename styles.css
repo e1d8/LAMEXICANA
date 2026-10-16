@@ -345,6 +345,10 @@ button {
   transform: translateY(-2px);
 }
 
+.navigation-menu-btn:disabled {
+  display: none;
+}
+
 .navigation-menu-btn svg {
   width: 23px;
   height: 23px;
@@ -464,7 +468,8 @@ button {
   flex: 0 0 auto;
 }
 
-.noscript-message {
+.noscript-message,
+.menu-message {
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
