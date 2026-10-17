@@ -336,6 +336,19 @@
           "name": "Quesadillas",
           "description": "Quesadillas de jamón York y queso, patatas fritas y bebida (agua, zumo o coca cola/fanta).",
           "price": "7.50€"
+        },
+        {
+          "name": "Pizza 🍕",
+          "description": "Descripción",
+          "allergens": [
+            "lacteo",
+            "huevos",
+            "gluten",
+            "cacahuetes",
+            "sesamo",
+            "altramuces",
+            "frutosConCascara"
+          ]
         }
       ]
     },
