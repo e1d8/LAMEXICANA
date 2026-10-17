@@ -336,26 +336,6 @@
           "name": "Quesadillas",
           "description": "Quesadillas de jamón York y queso, patatas fritas y bebida (agua, zumo o coca cola/fanta).",
           "price": "7.50€"
-        },
-        {
-          "name": "Pizza 🍕",
-          "description": "Descripción",
-          "allergens": [
-            "lacteo",
-            "huevos",
-            "gluten",
-            "cacahuetes",
-            "sesamo",
-            "altramuces",
-            "frutosConCascara"
-          ]
-        },
-        {
-          "name": "Spaggetti",
-          "price": "5.50€",
-          "allergens": [
-            "gluten"
-          ]
         }
       ]
     },
@@ -533,17 +513,6 @@
         {
           "name": "Chelada",
           "price": "4.50€"
-        }
-      ]
-    },
-    {
-      "id": "chupitos",
-      "name": "Chupitos",
-      "items": [
-        {
-          "name": "Cassalla",
-          "description": "Forteta",
-          "price": "0.20€"
         }
       ]
     }
