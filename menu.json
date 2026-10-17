@@ -349,6 +349,13 @@
             "altramuces",
             "frutosConCascara"
           ]
+        },
+        {
+          "name": "Spaggetti",
+          "price": "5.50€",
+          "allergens": [
+            "gluten"
+          ]
         }
       ]
     },
@@ -526,6 +533,17 @@
         {
           "name": "Chelada",
           "price": "4.50€"
+        }
+      ]
+    },
+    {
+      "id": "chupitos",
+      "name": "Chupitos",
+      "items": [
+        {
+          "name": "Cassalla",
+          "description": "Forteta",
+          "price": "0.20€"
         }
       ]
     }
