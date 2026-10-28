@@ -227,12 +227,6 @@
             "gluten",
             "lacteo"
           ]
-        },
-        {
-          "name": "Cacaus",
-          "allergens": [
-            "cacahuetes"
-          ]
         }
       ]
     },
@@ -524,7 +518,7 @@
     }
   ],
   "_editor": {
-    "saveNumber": 2,
-    "savedAt": "2026-10-28T09:33:02.758Z"
+    "saveNumber": 3,
+    "savedAt": "2026-10-28T09:40:52.111Z"
   }
 }
