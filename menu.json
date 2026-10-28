@@ -112,6 +112,15 @@
           "price": "3.20€"
         },
         {
+          "name": "Ivan",
+          "description": "El mejor",
+          "price": "99.00€",
+          "allergens": [
+            "gluten",
+            "sesamo"
+          ]
+        },
+        {
           "name": "Agua de jamaica",
           "price": "3.20€"
         },
@@ -518,7 +527,7 @@
     }
   ],
   "_editor": {
-    "saveNumber": 3,
-    "savedAt": "2026-10-28T09:40:52.111Z"
+    "saveNumber": 4,
+    "savedAt": "2026-10-28T11:56:50.549Z"
   }
 }
