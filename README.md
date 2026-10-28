@@ -61,6 +61,42 @@ no puede descargarse, se muestra un aviso para recargar la página. Si no hay
 secciones válidas, se indica que la carta no está disponible. El índice y los
 datos estructurados para buscadores usan únicamente las entradas validadas.
 
+## Nombres de los guardados en GitHub Actions
+
+Los guardados del editor publicado tendrán títulos como
+`#1 - Cambios del 17 de Octubre`. El número cuenta únicamente las modificaciones
+guardadas correctamente por la API del editor. Empieza en 1 con el primer guardado
+tras activar esta versión; no renombra publicaciones anteriores. La fecha usa
+la zona horaria de Madrid. Abrir la web, reenviar los mismos datos o reintentar
+una publicación no incrementa el contador.
+
+La API conserva el contador y la fecha UTC en el campo interno `_editor` de
+`menu.json`, junto a los productos, en el mismo commit. La carta ignora ese campo;
+no hay que editarlo ni eliminarlo manualmente. Un guardado fallido o un conflicto
+de versión no consume números. El título del commit también identifica el guardado
+si una publicación posterior falla o queda pendiente.
+
+Para activar los títulos de las publicaciones:
+
+1. En GitHub, abre **LaMexicana → Settings → Pages → Build and deployment →
+   Source** y elige **GitHub Actions**. Esta configuración sustituye la publicación
+   automática desde una rama.
+2. Sube el workflow `.github/workflows/pages.yml` de **este repositorio de la
+   carta** a `main` y espera a que termine su primera publicación.
+3. Sube los cambios del proyecto **LaMexicanaEditor**, incluido
+   `menu-save-history.mjs`, y vuelve a publicar su API en Cloudflare desde la carpeta
+   del editor con `npx --yes wrangler deploy`.
+4. Espera a que termine la publicación de la interfaz del editor. El siguiente
+   guardado con cambios creará el título numerado en **LaMexicana → Actions →
+   Publicar carta en GitHub Pages**. El workflow del repositorio del editor seguirá
+   llamándose «Publicar editor en GitHub Pages».
+
+Los cambios de código que publiques manualmente conservan su mensaje de commit
+como título y no incrementan el contador. Una ejecución manual desde Actions
+se titula «Publicación manual de la carta». Al ejecutar de nuevo una publicación
+se vuelve a publicar esa misma versión; para publicar la carta más reciente usa
+**Run workflow** en `main`. Solo se empaquetan la carta y sus recursos públicos.
+
 ## Comprobar los cambios
 
 Con el servidor local iniciado, abre <http://localhost:8000/tests/menu.html>.

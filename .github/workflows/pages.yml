@@ -1,0 +1,44 @@
+name: Publicar carta en GitHub Pages
+run-name: ${{ github.event_name == 'push' && github.event.head_commit.message || 'Publicación manual de la carta' }}
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - menu.json
+      - index.html
+      - script.js
+      - styles.css
+      - assets/**
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/configure-pages@v5
+      - name: Preparar la carta pública
+        run: |
+          mkdir -p _site
+          cp index.html script.js styles.css menu.json _site/
+          cp -R assets _site/assets
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Publicar
+        id: deployment
+        uses: actions/deploy-pages@v4
