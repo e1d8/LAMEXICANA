@@ -227,6 +227,12 @@
             "gluten",
             "lacteo"
           ]
+        },
+        {
+          "name": "TEST",
+          "allergens": [
+            "frutosConCascara"
+          ]
         }
       ]
     },
@@ -516,5 +522,9 @@
         }
       ]
     }
-  ]
+  ],
+  "_editor": {
+    "saveNumber": 1,
+    "savedAt": "2026-10-28T09:28:53.282Z"
+  }
 }
