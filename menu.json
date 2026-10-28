@@ -229,9 +229,9 @@
           ]
         },
         {
-          "name": "TEST",
+          "name": "Cacaus",
           "allergens": [
-            "frutosConCascara"
+            "cacahuetes"
           ]
         }
       ]
@@ -524,7 +524,7 @@
     }
   ],
   "_editor": {
-    "saveNumber": 1,
-    "savedAt": "2026-10-28T09:28:53.282Z"
+    "saveNumber": 2,
+    "savedAt": "2026-10-28T09:33:02.758Z"
   }
 }
